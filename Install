@@ -1,0 +1,62 @@
+#!/bin/sh
+
+#
+# Installation script for gene trap coordinate load
+#
+# 1) cp *.config.default *.config
+#    and edit as necessary.
+#
+# 2) Install 
+#
+# Must add a new section to this Install script when you add a new 
+# genetrap coordinate load
+
+Usage=Install
+
+#
+#  Function called when the install fails.
+#
+installFailed ()
+{
+    echo "Installation Failed: `date`"
+    exit 1
+}
+
+#
+#  Verify the arguments to the script, there shouldn't be any
+#
+if [ $# -ne 0 ]
+then
+    echo "Usage: ${Usage}"
+    installFailed
+fi
+
+#
+# Make sure config file exists and source it
+#
+cd `dirname $0`
+LOAD_CONFIG=gtcoordload.config
+
+if [ -r ${LOAD_CONFIG} ]
+then
+    echo "Source ${LOAD_CONFIG}"
+    . ${LOAD_CONFIG}
+else
+    echo "Cannot source configuration file: ${LOAD_CONFIG}"
+    installFailed
+fi
+
+#
+# Check to see if this is a development installation
+#
+DEV=""
+
+if [ "${INSTALL_TYPE}" = "dev" ]
+then
+    DEV="-d"
+fi
+
+#
+# run DLAInstall
+#
+${DLAINSTALL} ${DEV}

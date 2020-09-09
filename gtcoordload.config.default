@@ -1,0 +1,235 @@
+#format: sh
+#
+#  Configuration for Gene Trap Coordinate Load
+#
+#  This file sets up environment variables that are needed for 
+#  the Gene Trap Coordinate Load and creation of its input file
+#
+###########################################################################
+
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+CONFIG_MASTER=${MGICONFIG}/master.config.sh
+
+export CONFIG_MASTER
+
+. ${CONFIG_MASTER}
+
+##########################################################################
+#
+#  JAVA SETTINGS
+#
+###########################################################################
+
+JAVARUNTIMEOPTS="-Xms1500m -Xmx1500m"
+
+JAVA_LIB=${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/lib_java_dbsrdr/dbsrdr.jar:${MGI_JAVALIB}/dla.jar
+
+CLASSPATH=.:${JAVA_LIB}:${COMMON_CLASSPATH}
+
+export JAVARUNTIMEOPTS JAVA_LIB CLASSPATH
+
+
+###########################################################################
+#
+#  LOAD SPECIFIC SETTINGS
+#
+###########################################################################
+
+#
+# output file settings
+#
+
+# Full path the the logs, reports, and archive directories 
+FILEDIR=${DATALOADSOUTPUT}/genbank/gtcoordload
+
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+OUTPUTDIR=${FILEDIR}/output
+ARCHIVEDIR=${FILEDIR}/archive
+WORK_GFF_FILE=${OUTPUTDIR}/gtcoords.gff
+
+export FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR WORK_GFF_FILE
+
+#
+# input file settings
+#
+
+
+# full path to input file directory when APP_RADAR_INPUT=false
+INPUTDIR=${DATADOWNLOADS}
+
+# full path to the GFF format input files used to create coordload input
+# file, when APP_RADAR_INPUT=false
+APP_INFILES=/data/loads/genbank/gtblatpipeline/output.build38/best_blat_hits_single_Gbrowse.gff
+
+# get input files from RADAR if 'true'
+APP_RADAR_INPUT=true
+
+APP_CAT_METHOD=/usr/local/bin/cat
+
+export INPUTDIR APP_INFILES APP_RADAR_INPUT APP_CAT_METHOD
+
+# Full path to output for script which creates the coordload input file
+OUTFILE_NAME_CREATE=${OUTPUTDIR}/coordload.txt
+
+export OUTFILE_NAME_CREATE
+
+# Full path to the coordinate load input file
+INFILE_NAME=${OUTFILE_NAME_CREATE}
+
+export INFILE_NAME
+
+#
+# general settings
+#
+
+#  Configured Java classes 
+DLA_LOADER=org.jax.mgi.shr.dla.loader.coord.CoordLoader
+DLA_START=org.jax.mgi.shr.dla.loader.DLAStart
+COORD_INTERPRETER=org.jax.mgi.shr.dla.input.mgs.MGSCoordinateFormatInterpreter
+COORD_PROCESSOR=org.jax.mgi.dbs.mgd.loads.Coord.ChromosomeCoordMapProcessor
+
+export DLA_LOADER DLA_START COORD_INTERPRETER COORD_PROCESSOR
+
+# SQL STREAM
+DLA_LOAD_STREAM=org.jax.mgi.shr.dbutils.dao.BCP_Stream
+DLA_RADAR_STREAM=org.jax.mgi.shr.dbutils.dao.BCP_Stream
+
+# prefix of Configuration variable names for the load database
+# e.g. prefixes DBSERVER, DBNAME, BCP_PATH, etc
+DLA_DB_PREFIX=MGD
+
+export DLA_LOAD_STREAM DLA_RADAR_STREAM DLA_DB_PREFIX
+
+#  Complete path name of the log files
+LOG_PROC=${LOGDIR}/gtcoordload.proc.log
+LOG_DIAG=${LOGDIR}/gtcoordload.diag.log
+LOG_CUR=${LOGDIR}/gtcoordload.cur.log
+LOG_VAL=${LOGDIR}/gtcoordload.val.log
+
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
+
+# Send debug messages to the diagnostic log
+LOG_DEBUG=false
+DBDEBUG=false
+CACHE_DEBUG=false
+
+# log factory class so classes can get their own logger
+LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
+
+export LOG_DEBUG DBDEBUG CACHE_DEBUG LOG_FACTORY
+
+# this load's login value for DB table CreatedBy and ModifiedBy
+JOBSTREAM=gtcoordload
+
+# get files of this type from radar if input not on command line
+# this is output of gtblatpipeline
+FILETYPE=GenBank_GTCoordLoad
+
+export JOBSTREAM FILETYPE
+
+
+# "delete_reload" - delete collection, maps, and features
+# "add" - add features, and maps if necessary, to existing collection
+COORD_LOAD_MODE=add
+
+# logical db name for this data provider
+COORD_LOGICALDB="Sequence DB"
+
+# name of organism 
+COORD_ORGANISM="mouse, laboratory"
+
+# version of the coordinate load
+COORD_VERSION="GRCm38"
+
+export COORD_LOAD_MODE COORD_LOGICALDB COORD_ORGANISM COORD_VERSION
+
+# coordinate map collection to which this load belongs
+COORD_COLLECTION_NAME="dbGSS Gene Trap"
+
+# abbreviation for the coordinate collection
+# if no value assigned will be same as COORD_COLLECTION
+COORD_COLLECTION_ABBREV=
+
+# coordinate map type
+COORD_TYPE=Assembly
+
+# the coordinate map units
+COORD_UNITS="base pair"
+
+# MGI type name of the feature
+# e.g. 'Sequence' or 'Marker'
+COORD_FEATURE_MGITYPE=Sequence
+
+export COORD_COLLECTION_NAME COORD_COLLECTION_ABBREV COORD_TYPE
+export COORD_UNITS COORD_FEATURE_MGITYPE
+
+# okay to load multiple coordinates per object?
+COORD_REPEATS_OK=false
+
+# full path to multiple coordinate file used when not ok to load multiple 
+# coordinates i.e. COORD_REPEATS_OK=false
+COORD_REPEAT_FILE=${OUTPUTDIR}/multiCoord.out
+
+export COORD_REPEATS_OK COORD_REPEAT_FILE 
+
+###########################################################################
+#
+#  BCP MANAGER SETTINGS BY DATABASE
+#
+###########################################################################
+
+#  Settings used to create a BCP manager for the MGD database
+MGD_BCP_PATH=${OUTPUTDIR}
+
+# in delete_reload mode coords are always deleted regardless of this setting
+MGD_BCP_PREVENT_EXECUTE=false
+MGD_BCP_TRUNCATE_LOG=true
+MGD_BCP_DROP_INDEXES=false
+MGD_BCP_RECORD_STAMPING=false
+MGD_BCP_AUTO_FLUSH=false
+MGD_BCP_OK_TO_OVERWRITE=false
+
+export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
+export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
+export MGD_BCP_OK_TO_OVERWRITE
+
+#  Settings used to create a BCP manager for the MGD database
+RADAR_BCP_PATH=${OUTPUTDIR}
+RADAR_BCP_PREVENT_EXECUTE=false
+RADAR_BCP_TRUNCATE_LOG=true
+RADAR_BCP_DROP_INDEXES=false
+RADAR_BCP_RECORD_STAMPING=false
+RADAR_BCP_AUTO_FLUSH=false
+RADAR_BCP_OK_TO_OVERWRITE=false
+
+export RADAR_BCP_PATH RADAR_BCP_PREVENT_EXECUTE RADAR_BCP_TRUNCATE_LOG
+export RADAR_BCP_DROP_INDEXES RADAR_BCP_RECORD_STAMPING RADAR_BCP_AUTO_FLUSH
+export RADAR_BCP_OK_TO_OVERWRITE
+
+###########################################################################
+#
+#  MISCELLANEOUS SETTINGS
+#
+###########################################################################
+#  The name of the load for the subject of an email notification
+MAIL_LOADNAME="Gene Trap Coordinate Load"
+
+#  Recipient list for mailing the curation log file (comma-separated)
+MAIL_LOG_CUR="mgiadmin"
+
+export MAIL_LOADNAME MAIL_LOG_CUR
+
+#  INSTALLDIR expected by dlautils/DLAInstall
+INSTALLDIR=${GTCOORDLOAD}
+
+export INSTALLDIR
