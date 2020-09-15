@@ -86,7 +86,11 @@ else
     echo "Environment variable DLAJOBSTREAMFUNC has not been defined."
 fi
 
-${GTCOORDLOAD}/bin/createInputFile.py 
+${APP_CAT_METHOD} ${APP_INFILES} > ${WORK_GFF_FILE}
+STAT=$?
+checkStatus ${STAT} "Create single GFF input file"
+
+${APP_CAT_METHOD} ${WORK_GFF_FILE} | ${GTCOORDLOAD}/bin/createInputFile.py >> ${LOG_DIAG} ${LOG_PROC} 2>&1
 
 STAT=$?
 checkStatus ${STAT} "${GTCOORDLOAD}/bin/createInputFile.py"
