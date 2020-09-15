@@ -1,11 +1,10 @@
-
+#!/opt/python3.7/bin/python3.7
 #
 # Program: createInputFile.py
 #
 # Original Author: sc
 #
 # Purpose:
-#
 # This script reads GFF format records from stdin and writes them to a file
 #  in coordinate load format
 #
@@ -85,7 +84,7 @@ def loadLookup():
     where t._CellLine_key = aac._MutantCellLine_key
     and aac._Allele_key = saa._Allele_key''')
 
-    cmds.append('create index idx_1 on eucommSeq(_Sequence_key)')
+    cmds.append('create index idx_2 on eucommSeq(_Sequence_key)')
 
     # filter for just the upstream vector end and get the seqID
     cmds.append('''select t.*, a.accID
@@ -105,7 +104,7 @@ def loadLookup():
     where d._Creator_key = 3982963
     and d._Derivation_key = c._Derivation_key''')
 
-    cmds.append('create index idx_1 on tigemCL(_CellLine_key)')
+    cmds.append('create index idx_3 on tigemCL(_CellLine_key)')
 
     # get sequences associated with tigem MCLs (via allele)
     cmds.append('''select t._CellLine_key, saa._Sequence_key
@@ -114,7 +113,7 @@ def loadLookup():
     where t._CellLine_key = aac._MutantCellLine_key
     and aac._Allele_key = saa._Allele_key''')
 
-    cmds.append('create index idx_1 on tigemSeq(_Sequence_key)')
+    cmds.append('create index idx_4 on tigemSeq(_Sequence_key)')
     
     # get the seqID
     cmds.append('''select t.*, a.accID
@@ -127,14 +126,14 @@ def loadLookup():
 
     # union the eucomm and tigem sets
     cmds.append('''select t.accID
-    into temporary table all
+    into temporary table allSets
     from eucommUpstSeq t
     union
     select te.accID
     from tigemAccid te''')
 
     # load the lookup list
-    cmds.append('select distinct * from all')
+    cmds.append('select distinct * from allSets')
     results = db.sql(cmds, 'auto')
     for r in results[11]:
         seqID = r['accID']
@@ -161,7 +160,9 @@ def init():
 def run():
     line = sys.stdin.readline()
     while line != "":
-        tokenList =  str.splitfields(line, TAB)
+        print('line: %s' % line)
+        tokenList =  str.split(line)
+        print('tokens: %s' % tokenList)
         if tokenList[0].find('scaf') != -1:
             line = sys.stdin.readline()
             continue
@@ -175,7 +176,7 @@ def run():
         end = str.strip(tokenList[4])
         strand = str.strip(tokenList[6])
         # strip of leading "Gene "
-        id = str.strip(tokenList[8][4:])
+        id = str.strip(tokenList[9]) #tokenList[8][4:])
         if id in seqsToToggleList:
             if strand == '+':
                 strand = '-'
