@@ -131,7 +131,7 @@ createInputFile ()
     echo "" >> ${LOG_DIAG} 
     echo "`date`" >> ${LOG_DIAG} 
 
-    ${APP_CAT_METHOD} ${WORK_GFF_FILE} | ${GTCOORDLOAD}/bin/createInputFile.py >> ${LOG_DIAG} ${LOG_PROC} 2>&1
+    ${APP_CAT_METHOD} ${WORK_GFF_FILE} | ${GTCOORDLOAD}/bin/createInputFile.sh >> ${LOG_DIAG} ${LOG_PROC} 2>&1
 
     STAT=$?
     checkStatus ${STAT} "${GTCOORDLOAD}/bin/createInputFile.py"
