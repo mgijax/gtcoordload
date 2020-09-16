@@ -29,7 +29,7 @@ export CONFIG_MASTER
 #
 ###########################################################################
 
-JAVARUNTIMEOPTS="-Xms1500m -Xmx1500m"
+JAVARUNTIMEOPTS="-Xms6G -Xmx6G"
 
 JAVA_LIB=${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/lib_java_dbsrdr/dbsrdr.jar:${MGI_JAVALIB}/dla.jar
 
@@ -65,16 +65,16 @@ export FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR WORK_GFF_FILE
 
 
 # full path to input file directory when APP_RADAR_INPUT=false
-INPUTDIR=${DATADOWNLOADS}
+INPUTDIR=/mgi/all/wts_projects/13300/13349/Build39/GeneTraps/gtblatpipeline_files
 
 # full path to the GFF format input files used to create coordload input
 # file, when APP_RADAR_INPUT=false
-APP_INFILES=/data/loads/genbank/gtblatpipeline/output.build38/best_blat_hits_single_Gbrowse.gff
+APP_INFILES=${INPUTDIR}/best_blat_hits_single_Gbrowse.gff
 
 # get input files from RADAR if 'true'
-APP_RADAR_INPUT=true
+APP_RADAR_INPUT=false
 
-APP_CAT_METHOD=/usr/local/bin/cat
+APP_CAT_METHOD=/usr/bin/cat
 
 export INPUTDIR APP_INFILES APP_RADAR_INPUT APP_CAT_METHOD
 
@@ -140,7 +140,7 @@ export JOBSTREAM FILETYPE
 
 # "delete_reload" - delete collection, maps, and features
 # "add" - add features, and maps if necessary, to existing collection
-COORD_LOAD_MODE=add
+COORD_LOAD_MODE=delete_reload
 
 # logical db name for this data provider
 COORD_LOGICALDB="Sequence DB"
@@ -149,7 +149,7 @@ COORD_LOGICALDB="Sequence DB"
 COORD_ORGANISM="mouse, laboratory"
 
 # version of the coordinate load
-COORD_VERSION="GRCm38"
+COORD_VERSION="GRCm39"
 
 export COORD_LOAD_MODE COORD_LOGICALDB COORD_ORGANISM COORD_VERSION
 
@@ -225,7 +225,7 @@ export RADAR_BCP_OK_TO_OVERWRITE
 MAIL_LOADNAME="Gene Trap Coordinate Load"
 
 #  Recipient list for mailing the curation log file (comma-separated)
-MAIL_LOG_CUR="mgiadmin"
+MAIL_LOG_CUR=""
 
 export MAIL_LOADNAME MAIL_LOG_CUR
 
